@@ -2,13 +2,13 @@ package khuong.com.vngsim.controller;
 
 import jakarta.validation.Valid;
 import khuong.com.vngsim.entity.User;
-import khuong.com.vngsim.payload.request.LoginRequest;
-import khuong.com.vngsim.payload.request.SignupRequest;
+import khuong.com.vngsim.payload.request.*;
 import khuong.com.vngsim.payload.response.JwtResponse;
 import khuong.com.vngsim.payload.response.MessageResponse;
 import khuong.com.vngsim.repository.UserRepository;
 import khuong.com.vngsim.security.JwtUtils;
 import khuong.com.vngsim.security.UserDetailsImpl;
+import khuong.com.vngsim.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -77,4 +77,35 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return authService.logout();
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+        return authService.refreshToken(request);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return authService.forgotPassword(request);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request);
+    }
+
+
 }
