@@ -1,15 +1,16 @@
+// User.java
 package khuong.com.smartorder.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -47,7 +48,6 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserRole> roles;
 
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -59,7 +59,6 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    // Constructor with parameters
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;

@@ -1,3 +1,4 @@
+// SignupRequest.java
 package khuong.com.smartorder.payload.request;
 
 import jakarta.validation.constraints.Email;
@@ -27,5 +28,5 @@ public class SignupRequest {
     private String address;
     private String gender;
 
-    private Set<String> role;
+    private Set<String> roles;
 }

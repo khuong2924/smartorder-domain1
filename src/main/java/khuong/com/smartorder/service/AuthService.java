@@ -1,5 +1,7 @@
+// AuthService.java
 package khuong.com.smartorder.service;
 
+import khuong.com.smartorder.entity.ERole;
 import khuong.com.smartorder.entity.Role;
 import khuong.com.smartorder.entity.User;
 import khuong.com.smartorder.entity.UserRole;
@@ -53,31 +55,24 @@ public class AuthService {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
-        Set<String> strRoles = signUpRequest.getRole();
+        Set<String> strRoles = signUpRequest.getRoles();
         Set<UserRole> userRoles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName("ROLE_USER")
+            Role userRole = roleRepository.findByName(ERole.ROLE_GUEST)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             userRoles.add(new UserRole(user, userRole));
         } else {
             strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        userRoles.add(new UserRole(user, adminRole));
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName("ROLE_MODERATOR")
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        userRoles.add(new UserRole(user, modRole));
-                        break;
-                    default:
-                        Role defaultRole = roleRepository.findByName("ROLE_USER")
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        userRoles.add(new UserRole(user, defaultRole));
+                ERole eRole;
+                try {
+                    eRole = ERole.valueOf(role);
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException("Error: Role " + role + " is not found.");
                 }
+                Role foundRole = roleRepository.findByName(eRole)
+                        .orElseThrow(() -> new RuntimeException("Error: Role " + role + " is not found."));
+                userRoles.add(new UserRole(user, foundRole));
             });
         }
 
@@ -86,6 +81,7 @@ public class AuthService {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -103,8 +99,6 @@ public class AuthService {
     }
 
     public ResponseEntity<?> logout() {
-
-
         return ResponseEntity.ok(new MessageResponse("Logout successful"));
     }
 
@@ -121,8 +115,6 @@ public class AuthService {
     public ResponseEntity<?> forgotPassword(ForgotPasswordRequest request) {
         String email = request.getEmail();
         if (userRepository.existsByEmail(email)) {
-
-
             return ResponseEntity.ok(new MessageResponse("Password reset link sent"));
         } else {
             return ResponseEntity.badRequest().body(new MessageResponse("Email not found"));

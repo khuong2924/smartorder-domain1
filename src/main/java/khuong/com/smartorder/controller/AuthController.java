@@ -1,11 +1,16 @@
+// AuthController.java
 package khuong.com.smartorder.controller;
 
 import jakarta.validation.Valid;
 import khuong.com.smartorder.entity.User;
+import khuong.com.smartorder.entity.ERole;
+import khuong.com.smartorder.entity.Role;
+import khuong.com.smartorder.entity.UserRole;
 import khuong.com.smartorder.payload.request.*;
 import khuong.com.smartorder.payload.response.JwtResponse;
 import khuong.com.smartorder.payload.response.MessageResponse;
 import khuong.com.smartorder.repository.UserRepository;
+import khuong.com.smartorder.repository.RoleRepository;
 import khuong.com.smartorder.security.JwtUtils;
 import khuong.com.smartorder.security.UserDetailsImpl;
 import khuong.com.smartorder.service.AuthService;
@@ -18,6 +23,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/auth")
@@ -27,6 +35,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -64,20 +75,40 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        User user = new User();
-        user.setUsername(signUpRequest.getUsername());
-        user.setEmail(signUpRequest.getEmail());
-        user.setPassword(encoder.encode(signUpRequest.getPassword()));
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()));
         user.setFullName(signUpRequest.getFullName());
         user.setPhone(signUpRequest.getPhone());
         user.setAddress(signUpRequest.getAddress());
         user.setGender(signUpRequest.getGender());
 
+        Set<String> strRoles = signUpRequest.getRoles();
+        Set<UserRole> userRoles = new HashSet<>();
+
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(ERole.ROLE_GUEST)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            userRoles.add(new UserRole(user, userRole));
+        } else {
+            strRoles.forEach(role -> {
+                ERole eRole;
+                try {
+                    eRole = ERole.valueOf(role);
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException("Error: Role " + role + " is not found.");
+                }
+                Role foundRole = roleRepository.findByName(eRole)
+                        .orElseThrow(() -> new RuntimeException("Error: Role " + role + " is not found."));
+                userRoles.add(new UserRole(user, foundRole));
+            });
+        }
+
+        user.setRoles(userRoles);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-
 
     @Autowired
     private AuthService authService;
@@ -106,6 +137,4 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         return authService.resetPassword(request);
     }
-
-
 }

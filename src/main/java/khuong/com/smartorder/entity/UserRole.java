@@ -1,3 +1,4 @@
+
 package khuong.com.smartorder.entity;
 
 import jakarta.persistence.*;
@@ -5,7 +6,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_roles")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
