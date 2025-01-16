@@ -1,14 +1,13 @@
 package khuong.com.smartorder.entity;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "user_roles")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRole {
@@ -23,4 +22,9 @@ public class UserRole {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    public UserRole(User user, Role role) {
+        this.user = user;
+        this.role = role;
+    }
 }

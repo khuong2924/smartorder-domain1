@@ -1,20 +1,38 @@
 package khuong.com.smartorder.service;
 
+import khuong.com.smartorder.entity.Role;
 import khuong.com.smartorder.entity.User;
+import khuong.com.smartorder.entity.UserRole;
 import khuong.com.smartorder.payload.request.*;
+import khuong.com.smartorder.payload.response.JwtResponse;
 import khuong.com.smartorder.payload.response.MessageResponse;
+import khuong.com.smartorder.repository.RoleRepository;
 import khuong.com.smartorder.repository.UserRepository;
 import khuong.com.smartorder.security.JwtUtils;
+import khuong.com.smartorder.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class AuthService {
 
     @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -22,18 +40,75 @@ public class AuthService {
     @Autowired
     private PasswordEncoder encoder;
 
+    public ResponseEntity<?> registerUser(SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()));
+
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<UserRole> userRoles = new HashSet<>();
+
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            userRoles.add(new UserRole(user, userRole));
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        userRoles.add(new UserRole(user, adminRole));
+                        break;
+                    case "mod":
+                        Role modRole = roleRepository.findByName("ROLE_MODERATOR")
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        userRoles.add(new UserRole(user, modRole));
+                        break;
+                    default:
+                        Role defaultRole = roleRepository.findByName("ROLE_USER")
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        userRoles.add(new UserRole(user, defaultRole));
+                }
+            });
+        }
+
+        user.setRoles(userRoles);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
     public ResponseEntity<?> login(LoginRequest loginRequest) {
-        // Implement login logic
-        return ResponseEntity.ok("Login successful");
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail()));
     }
 
     public ResponseEntity<?> logout() {
-        // Implement logout logic
+
+
         return ResponseEntity.ok(new MessageResponse("Logout successful"));
     }
 
     public ResponseEntity<?> refreshToken(TokenRefreshRequest request) {
-        // Implement refresh token logic
         String token = request.getRefreshToken();
         if (jwtUtils.validateJwtToken(token)) {
             String newToken = jwtUtils.generateJwtTokenFromRefreshToken(token);
@@ -44,10 +119,10 @@ public class AuthService {
     }
 
     public ResponseEntity<?> forgotPassword(ForgotPasswordRequest request) {
-        // Implement forgot password logic
         String email = request.getEmail();
         if (userRepository.existsByEmail(email)) {
-            // Send password reset link logic
+
+
             return ResponseEntity.ok(new MessageResponse("Password reset link sent"));
         } else {
             return ResponseEntity.badRequest().body(new MessageResponse("Email not found"));
@@ -55,7 +130,6 @@ public class AuthService {
     }
 
     public ResponseEntity<?> resetPassword(ResetPasswordRequest request) {
-        // Implement reset password logic
         String token = request.getToken();
         if (jwtUtils.validateJwtToken(token)) {
             String newPassword = request.getNewPassword();

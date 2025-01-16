@@ -47,6 +47,7 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserRole> roles;
 
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -56,5 +57,12 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Constructor with parameters
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 }

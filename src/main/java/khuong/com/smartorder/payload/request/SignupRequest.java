@@ -1,10 +1,11 @@
 package khuong.com.smartorder.payload.request;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 public class SignupRequest {
@@ -25,4 +26,6 @@ public class SignupRequest {
     private String phone;
     private String address;
     private String gender;
+
+    private Set<String> role;
 }
