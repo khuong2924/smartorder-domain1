@@ -3,12 +3,16 @@ package khuong.com.smartorder.controller;
 import jakarta.validation.Valid;
 import khuong.com.smartorder.dto.UpdateUserDTO;
 import khuong.com.smartorder.dto.UserDTO;
+import khuong.com.smartorder.entity.User;
+import khuong.com.smartorder.repository.UserRepository;
 import khuong.com.smartorder.security.UserDetailsImpl;
 import khuong.com.smartorder.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
 
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private UserService userService;
 
@@ -33,5 +39,10 @@ public class UserController {
             @Valid @RequestBody UpdateUserDTO updateRequest) {
         UserDTO userResponse = userService.updateUserProfile(currentUser.getId(), updateRequest);
         return ResponseEntity.ok(userResponse);
+    }
+
+    @GetMapping("/me")
+    public User getCurrentUser() {
+        return userService.getCurrentUser();
     }
 }
