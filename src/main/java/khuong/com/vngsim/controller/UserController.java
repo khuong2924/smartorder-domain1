@@ -1,13 +1,10 @@
 package khuong.com.vngsim.controller;
 
-
 import jakarta.validation.Valid;
-import khuong.com.vngsim.entity.User;
-import khuong.com.vngsim.exception.ResourceNotFoundException;
 import khuong.com.vngsim.payload.request.UpdateUserRequest;
 import khuong.com.vngsim.payload.response.UserResponse;
-import khuong.com.vngsim.repository.UserRepository;
 import khuong.com.vngsim.security.UserDetailsImpl;
+import khuong.com.vngsim.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,16 +15,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping("/profile")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getUserProfile(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-        User user = userRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        return ResponseEntity.ok(mapToUserResponse(user));
+        UserResponse userResponse = userService.getUserProfile(currentUser.getId());
+        return ResponseEntity.ok(userResponse);
     }
 
     @PutMapping("/profile")
@@ -35,38 +31,7 @@ public class UserController {
     public ResponseEntity<?> updateUserProfile(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
             @Valid @RequestBody UpdateUserRequest updateRequest) {
-        User user = userRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if (updateRequest.getFullName() != null) {
-            user.setFullName(updateRequest.getFullName());
-        }
-        if (updateRequest.getPhone() != null) {
-            user.setPhone(updateRequest.getPhone());
-        }
-        if (updateRequest.getAddress() != null) {
-            user.setAddress(updateRequest.getAddress());
-        }
-        if (updateRequest.getGender() != null) {
-            user.setGender(updateRequest.getGender());
-        }
-
-        user = userRepository.save(user);
-
-        return ResponseEntity.ok(mapToUserResponse(user));
-    }
-
-    private UserResponse mapToUserResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getPhone(),
-                user.getAddress(),
-                user.getGender(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
+        UserResponse userResponse = userService.updateUserProfile(currentUser.getId(), updateRequest);
+        return ResponseEntity.ok(userResponse);
     }
 }
