@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,5 +20,6 @@ public class UserDTO {
     private String phone;
     private String address;
     private String gender;
+    private Set<String> roles;
 
 }

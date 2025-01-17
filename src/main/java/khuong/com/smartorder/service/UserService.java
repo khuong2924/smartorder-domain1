@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
 
@@ -55,7 +57,8 @@ public class UserService {
         return userDTO;
     }
 
-    public User getCurrentUser() {
+
+    public UserDTO getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
         if (principal instanceof UserDetails) {
@@ -63,6 +66,16 @@ public class UserService {
         } else {
             username = principal.toString();
         }
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getGender(),
+                user.getRoles().stream().map(role -> role.getRole().getName().toString()).collect(Collectors.toSet())
+        );
     }
 }

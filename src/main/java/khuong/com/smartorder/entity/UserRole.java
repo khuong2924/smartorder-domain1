@@ -1,6 +1,7 @@
 
 package khuong.com.smartorder.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class UserRole {
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
+
     private Role role;
 
     public UserRole(User user, Role role) {

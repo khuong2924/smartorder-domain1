@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public User getCurrentUser() {
+    public UserDTO getCurrentUser() {
         return userService.getCurrentUser();
     }
 }
