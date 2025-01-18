@@ -1,5 +1,7 @@
 package khuong.com.smartorder.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import khuong.com.smartorder.dto.UpdateUserDTO;
 import khuong.com.smartorder.dto.UserDTO;
@@ -10,9 +12,11 @@ import khuong.com.smartorder.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -44,5 +48,15 @@ public class UserController {
     @GetMapping("/me")
     public UserDTO getCurrentUser() {
         return userService.getCurrentUser();
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request,response, auth);
+        }
+        return ResponseEntity.ok("Logout successfully");
+
     }
 }
