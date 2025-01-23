@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>khuong.com</groupId>
-    <artifactId>vng-sim</artifactId>
+    <artifactId>be-identity</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>vng-sim</name>
-    <description>vng-sim</description>
+    <name>be-identity</name>
+    <description>be-identity</description>
     <url/>
     <licenses>
         <license/>
