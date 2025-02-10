@@ -50,6 +50,7 @@ public class UserController {
         return userService.getCurrentUser();
     }
 
+
     @GetMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
