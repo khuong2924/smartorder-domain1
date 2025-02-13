@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import khuong.com.smartorder.dto.UpdateUserDTO;
 import khuong.com.smartorder.dto.UserDTO;
-import khuong.com.smartorder.entity.User;
 import khuong.com.smartorder.repository.UserRepository;
 import khuong.com.smartorder.security.UserDetailsImpl;
 import khuong.com.smartorder.service.UserService;
@@ -15,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
