@@ -59,7 +59,7 @@ public class AuthService {
         Set<UserRole> userRoles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_GUEST)
+            Role userRole = roleRepository.findByName(ERole.ROLE_WAITER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             userRoles.add(new UserRole(user, userRole));
         } else {

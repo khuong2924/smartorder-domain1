@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>khuong.com</groupId>
-    <artifactId>smartorder_domain1</artifactId>
+    <artifactId>domain1</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>be-identity</name>
-    <description>be-identity</description>
+    <name>domain1</name>
+    <description>domain1</description>
     <url/>
     <licenses>
         <license/>
@@ -147,6 +147,7 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
