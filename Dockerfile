@@ -8,9 +8,18 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl
 COPY --from=build /app/target/domain1-0.0.1-SNAPSHOT.jar app.jar
 
-# Thêm các biến môi trường mặc định
-ENV JWT_SECRET=8K9sJ2mPqX7vL4rT5nY8uW3iB6oZ9cA1dF4gH7jK
-ENV JWT_EXPIRATION=86400000
+
+ARG JWT_SECRET
+ARG JWT_EXPIRATION=86400000
+
+
+ENV JWT_SECRET=${JWT_SECRET}
+ENV JWT_EXPIRATION=${JWT_EXPIRATION}
+ENV TZ=Asia/Ho_Chi_Minh
+
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8081/identity/actuator/health || exit 1
 
 EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
