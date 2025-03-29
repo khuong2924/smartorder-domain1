@@ -20,6 +20,6 @@ public class JwtResponse {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.roles = null;
+        this.roles = roles;
     }
 }
